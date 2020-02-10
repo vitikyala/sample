@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="d56b69e2-c735-46a1-86cd-4eae198ff465" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="07e924ae-6f90-48d3-a411-d31145443bbc" >
+    <salesforce:cached-basic-connection username="vihari.itikyala@gsa.gov.ucwnm.eeo.eeodv88dvn" password="Salesforce@143" securityToken="jFdZ0KKPJvysbRchbp97kanHS" url="https://gsa--eeodv88dvn.cs32.my.salesforce.com/services/Soap/u/46.0"/>
+  </salesforce:sfdc-config>
+  <flow name="sampleFlow" doc:id="dac4114c-fc2a-4c77-84a1-371292f7b153" >
+		<http:listener doc:name="Listener" doc:id="80a24d35-3064-4d68-8704-c8189b2ae38c" config-ref="HTTP_Listener_config" path="/sample"/>
+    <ee:transform doc:name="Transform Message" doc:id="37eb5d0f-bf46-4df5-a2bf-8e4cd1c021f2" >
+      <ee:message >
+        <ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+[{
+	TransactionID__c:"1111",
+	FY__c:"2000",
+	EstimatedIAAmount__c:1000,
+	Lease_Term__c:1
+}]]]></ee:set-payload>
+      </ee:message>
+    </ee:transform>
+    <salesforce:create-single doc:id="88290b81-1842-44ab-9701-73e0edf58019" config-ref="Salesforce_Config" type="Glxy_Transaction__c"/>
+    <ee:transform doc:name="Transform Message" doc:id="645dcb53-c061-4cea-ae9b-848c9a23503c" >
+      <ee:message >
+        <ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+      </ee:message>
+    </ee:transform>
+    <logger level="INFO" doc:name="Logger" doc:id="fd6b94b8-7a77-44d6-8dbf-60a1a9337dfd" message="Response after the message payload is : #[payload]" />
+	</flow>
+</mule>
